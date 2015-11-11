@@ -24,8 +24,10 @@
 """ The entry point of the Raw Test module """
 
 import logging
-from ..lib_net.poller import POLLER
 from ..mod_raw_test.raw_srvr_glue import RAW_SERVER_EX
+from .negotiate_server_raw import NEGOTIATE_SERVER_RAW
+from ..negotiate_server import NEGOTIATE_SERVER
+
 def _run_test(message):
     """ Run the Raw Test test """
     raise RuntimeError("Not implemented")
@@ -35,14 +37,18 @@ def mod_load(context, message):
     logging.debug("raw_test: init for context '%s'... in progress", context)
 
     if context == "server":
-
         negotiate_server = message["negotiate_server"]
         http_server = message["http_server"]
 
         logging.debug("raw_test: register negotiate server module... in progress")
+        NEGOTIATE_SERVER.register_module('raw', NEGOTIATE_SERVER_RAW)
+        logging.debug("raw_test: register negotiate server module... complete")
 
         conf = message["configuration"]
         RAW_SERVER_EX.listen((conf["address"], 12345), conf['prefer_ipv6'], 0, '')
         logging.debug('server: starting raw server... complete')
+
+    else:
+        logging.warning("raw_test: unknown context: %s", context)
 
     logging.debug("raw_test: init for context '%s'... complete", context)
